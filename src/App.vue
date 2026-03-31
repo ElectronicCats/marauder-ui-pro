@@ -54,21 +54,36 @@
 
       <!-- Right Content -->
       <div class="flex-1 flex flex-col gap-4">
-        <!-- Toggle Button -->
-        <div class="mb-2 flex justify-end">
-          <button @click="rightContentView = rightContentView === 'ap' ? 'bt' : 'ap'"
-            class="btn btn-accent">
-            {{ rightContentView === 'ap' ? 'Bluetooth' : 'WiFi APs' }}
+        <!-- View Toggle -->
+        <div class="mb-2 flex justify-end gap-2">
+          <button v-for="v in viewOptions" :key="v.key"
+            @click="rightContentView = v.key"
+            class="btn"
+            :class="rightContentView === v.key ? 'btn-accent' : ''">
+            {{ v.label }}
           </button>
         </div>
+        <!-- Active Command Indicator -->
+        <div v-if="serialConnection.activeCommand.value"
+          class="flex items-center justify-between bg-emerald-950/40 border border-emerald-800/50 rounded px-3 py-1.5 text-sm">
+          <span class="font-mono text-emerald-400">
+            <span class="inline-block w-2 h-2 bg-emerald-400 rounded-full mr-2 animate-pulse"></span>
+            {{ serialConnection.activeCommand.value }}
+          </span>
+          <button @click="serialConnection.sendCommand('stopscan')" class="text-xs btn btn-danger py-1 px-2">
+            Stop
+          </button>
+        </div>
+
         <!-- Terminal Output -->
         <div class="min-h-[12rem] h-48 terminal-container p-4 bg-zinc-950/50 backdrop-blur-sm mb-4">
           <TerminalOutput />
         </div>
-        <!-- APs or Bluetooth List -->
+        <!-- Content Panel -->
         <div class="flex-1 card p-4 min-h-0">
           <AccessPointTable v-if="rightContentView === 'ap'" />
-          <BluetoothDeviceTable v-else />
+          <BluetoothDeviceTable v-else-if="rightContentView === 'bt'" />
+          <GpsPanel v-else-if="rightContentView === 'gps'" />
         </div>
       </div>
     </div>
@@ -88,6 +103,7 @@ import CommandBuilder from './components/CommandBuilder.vue'
 import TerminalOutput from './components/TerminalOutput.vue'
 import AccessPointTable from './components/AccessPointTable.vue'
 import BluetoothDeviceTable from './components/BluetoothDeviceTable.vue'
+import GpsPanel from './components/GpsPanel.vue'
 import WorkflowDialog from './components/WorkflowDialog.vue'
 import SystemUtilities from './components/SystemUtilities.vue'
 import pwnterreyLogo from './assets/Pwnterrey-1024x379.png'
@@ -98,6 +114,11 @@ const demoUpdateInterval = ref(null)
 
 // State for right content view alternation
 const rightContentView = ref('ap')
+const viewOptions = [
+  { key: 'ap', label: 'WiFi APs' },
+  { key: 'bt', label: 'Bluetooth' },
+  { key: 'gps', label: 'GPS' }
+]
 
 // Add mobile detection
 const isMobileDevice = ref(false)
