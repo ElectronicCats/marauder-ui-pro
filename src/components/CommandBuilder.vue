@@ -42,6 +42,10 @@
           class="btn btn-accent">
           Spam Samsung
         </button>
+        <button @click="sendCommand('blespam -t google')"
+          class="btn btn-accent">
+          Spam Google
+        </button>
         <button @click="sendCommand('blespam -t flipper')"
           class="btn btn-accent">
           Spam Flipper
@@ -91,14 +95,14 @@
 
   const wifiCommands = [
     { label: 'Scan AP', command: 'scanap' },
-    { label: 'Scan STA', command: 'scansta' },
+    { label: 'Scan All', command: 'scanall' },
     { label: 'Sniff Beacon', command: 'sniffbeacon' },
     { label: 'Sniff Deauth', command: 'sniffdeauth' },
     { label: 'Sniff PMKID', command: 'sniffpmkid' },
     { label: 'Sniff Pwn', command: 'sniffpwn' },
     { label: 'Sniff Raw', command: 'sniffraw' },
     { label: 'Sniff Skim', command: 'sniffskim' },
-    { label: 'Wardrive', command: 'wardrive -s' }
+    { label: 'Wardrive', command: 'wardrive -serial' }
   ]
 
   const btCommands = [

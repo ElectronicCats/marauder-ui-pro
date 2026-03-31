@@ -160,16 +160,6 @@ const workflows = [
     ]
   },
   {
-    id: 'random-beacon-spam-list',
-    name: 'Random Beacon Spam (List)',
-    description: 'Generates a list of random SSIDs and broadcasts beacon frames using this list.',
-    steps: [
-      { command: 'ssid -a -g 50', description: 'Generate 50 random SSIDs' },
-      { command: 'list -s', description: 'Display generated SSIDs' },
-      { command: 'attack -t beacon -l', description: 'Execute beacon list attack' }
-    ]
-  },
-  {
     id: 'list-beacon-spam',
     name: 'List Beacon Spam',
     description: 'Creates a custom list of SSIDs and broadcasts beacon frames using this list.',
@@ -237,7 +227,7 @@ const workflows = [
         placeholder: '0,1'
       },
       { command: 'list -a', description: 'Verify selected access points' },
-      { command: 'scansta', description: 'Scan for stations' },
+      { command: 'scanall', description: 'Scan for stations' },
       { command: 'list -c', description: 'List available stations' },
       {
         command: 'select -c {staTargets}',
@@ -291,7 +281,6 @@ const workflows = [
     description: 'Scans for hosts and maps open ports on the local network.',
     steps: [
       { command: 'pingscan', description: 'Ping scan for active hosts' },
-      { command: 'arpscan', description: 'ARP scan to resolve MAC addresses' },
       { command: 'portscan', description: 'Port scan for open services' }
     ]
   },

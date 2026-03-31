@@ -4,13 +4,13 @@
         <button @click="emitCommand('scanap')" class="command-btn">
           Scan AP
         </button>
-        <button @click="emitCommand('scansta')" class="command-btn">
-          Scan Stations
+        <button @click="emitCommand('scanall')" class="command-btn">
+          Scan All
         </button>
         <button @click="emitCommand('stopscan')" class="command-btn bg-red-500 hover:bg-red-600">
           Stop Scan
         </button>
-        <button @click="emitCommand('wardrive -s')" class="command-btn">
+        <button @click="emitCommand('wardrive -serial')" class="command-btn">
           Wardrive
         </button>
       </div>
