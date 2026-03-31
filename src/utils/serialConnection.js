@@ -6,8 +6,27 @@ const reader = ref(null)
 const isConnected = ref(false)
 const terminalOutput = ref([])
 const isDemoMode = ref(false)
+const activeCommand = ref(null)
 let buffer = ''
 let keepReading = false
+
+// Commands that run continuously until stopscan
+const continuousCommands = new Set([
+  'scanap', 'scanall',
+  'sniffbeacon', 'sniffdeauth', 'sniffpmkid', 'sniffpwn', 'sniffraw',
+  'sniffbt', 'sniffskim', 'sniffmultissid', 'sniffpinescan', 'sniffsae',
+  'mactrack', 'packetcount',
+  'attack', 'sigmon', 'pingscan', 'portscan',
+  'gpsdata', 'nmea', 'wardrive', 'btwardrive', 'gpspoi',
+  'karma'
+])
+
+const isContinuous = (command) => {
+  const base = command.split(/\s+/)[0]
+  // gps -t (tracker) is also continuous
+  if (base === 'gps' && command.includes('-t')) return true
+  return continuousCommands.has(base)
+}
 
 export const useSerialConnection = () => {
   const connect = async () => {
@@ -93,6 +112,25 @@ export const useSerialConnection = () => {
     }
   }
 
+  const writeToSerial = async (text) => {
+    const writer = port.value.writable.getWriter()
+    const encoder = new TextEncoder()
+    await writer.write(encoder.encode(text))
+    writer.releaseLock()
+  }
+
+  const stopIfRunning = async () => {
+    if (!activeCommand.value) return
+    try {
+      await writeToSerial('stopscan\n')
+      addToTerminal('> stopscan (auto)', 'command')
+      activeCommand.value = null
+      await new Promise(resolve => setTimeout(resolve, 300))
+    } catch (error) {
+      console.error('Auto-stop error:', error)
+    }
+  }
+
   const sendCommand = async (command) => {
     console.log(isDemoMode.value)
     if (isDemoMode.value) {
@@ -116,10 +154,12 @@ export const useSerialConnection = () => {
           break
         case 'stopscan':
           addToTerminal('Stopping all scans...')
+          activeCommand.value = null
           break
         default:
           addToTerminal(`Executing: ${command}`)
       }
+      if (isContinuous(command)) activeCommand.value = command
       return
     }
 
@@ -128,13 +168,23 @@ export const useSerialConnection = () => {
       return
     }
 
+    // Auto-stop running scan before starting a new continuous command
+    if (isContinuous(command) && activeCommand.value) {
+      await stopIfRunning()
+    }
+
+    // stopscan clears active state
+    if (command === 'stopscan') {
+      activeCommand.value = null
+    }
+
     try {
-      const writer = port.value.writable.getWriter()
-      const encoder = new TextEncoder()
-      const data = encoder.encode(command + '\n')
-      await writer.write(data)
+      await writeToSerial(command + '\n')
       addToTerminal(`> ${command}`, 'command')
-      writer.releaseLock()
+
+      if (isContinuous(command)) {
+        activeCommand.value = command
+      }
     } catch (error) {
       console.error('Send error:', error)
       addToTerminal(`✗ Failed to send command: ${error.message}`, 'error')
@@ -154,11 +204,8 @@ export const useSerialConnection = () => {
     }
 
     try {
-      const writer = port.value.writable.getWriter()
-      const encoder = new TextEncoder()
-      await writer.write(encoder.encode(rawText))
+      await writeToSerial(rawText)
       addToTerminal(`> [raw] ${rawText}`, 'command')
-      writer.releaseLock()
     } catch (error) {
       console.error('Raw send error:', error)
       addToTerminal(`✗ Failed to send raw payload: ${error.message}`, 'error')
@@ -194,6 +241,7 @@ export const useSerialConnection = () => {
     terminalOutput,
     connect,
     disconnect,
+    activeCommand: computed(() => activeCommand.value),
     sendCommand,
     sendRaw
   }
