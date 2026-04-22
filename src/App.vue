@@ -83,6 +83,7 @@
         <div class="flex-1 card p-4 min-h-0">
           <AccessPointTable v-if="rightContentView === 'ap'" />
           <BluetoothDeviceTable v-else-if="rightContentView === 'bt'" />
+          <NfcPanel v-else-if="rightContentView === 'nfc'" />
           <GpsPanel v-else-if="rightContentView === 'gps'" />
           <WardrivePanel v-else-if="rightContentView === 'wardrive'" />
         </div>
@@ -106,6 +107,7 @@ import AccessPointTable from './components/AccessPointTable.vue'
 import BluetoothDeviceTable from './components/BluetoothDeviceTable.vue'
 import GpsPanel from './components/GpsPanel.vue'
 import WardrivePanel from './components/WardrivePanel.vue'
+import NfcPanel from './components/NfcPanel.vue'
 import WorkflowDialog from './components/WorkflowDialog.vue'
 import SystemUtilities from './components/SystemUtilities.vue'
 import pwnterreyLogo from './assets/Pwnterrey-1024x379.png'
@@ -119,6 +121,7 @@ const rightContentView = ref('ap')
 const viewOptions = [
   { key: 'ap', label: 'WiFi APs' },
   { key: 'bt', label: 'Bluetooth' },
+  { key: 'nfc', label: 'NFC' },
   { key: 'gps', label: 'GPS' },
   { key: 'wardrive', label: 'Wardrive' }
 ]
@@ -126,8 +129,6 @@ const viewOptions = [
 const switchToView = (view) => {
   rightContentView.value = view
 }
-provide('switchToView', switchToView)
-
 // Add mobile detection
 const isMobileDevice = ref(false)
 
@@ -412,6 +413,51 @@ const workflows = [
       { command: 'karma -p', description: 'Enable Karma mode' },
       { command: 'scanap', description: 'Start background scan' }
     ]
+  },
+  {
+    id: 'nfc-evil-portal-redirect',
+    name: 'Social Engineering Redirect',
+    description: 'Redirects NFC victims to the Evil Portal IP address.',
+    steps: [
+      { command: 'nfc scan', description: 'Ensure NFC chip is ready' },
+      { command: 'nfc -u http://192.168.4.1', description: 'Write portal URL to chip' },
+      {
+        command: 'evilportal -w {filename}',
+        description: 'Start Evil Portal with selected file',
+        requiresInput: true,
+        inputLabel: 'HTML Filename',
+        placeholder: 'login.html'
+      }
+    ]
+  },
+  {
+    id: 'nfc-stealth-contact',
+    name: 'Stealth Contact Drop',
+    description: 'Writes a professional IT vCard to the tag and verifies it.',
+    steps: [
+      { command: 'nfc scan', description: 'Check chip' },
+      { command: 'nfc -v "IT Support,555-0199,admin@company.com"', description: 'Write fake IT vCard' },
+      { command: 'nfc read', description: 'Verify memory content' }
+    ]
+  },
+  {
+    id: 'nfc-audit-wipe',
+    name: 'Audit & Wipe',
+    description: 'Audits the current tag content and wipes it for security.',
+    steps: [
+      { command: 'nfc read', description: 'Audit current content' },
+      { command: 'nfc -t " "', description: 'Wipe message with empty text' }
+    ]
+  },
+  {
+    id: 'nfc-triggered-deauth',
+    name: 'NFC Triggered Deauth',
+    description: 'Sets an NFC warning and launches a global deauth attack.',
+    steps: [
+      { command: 'nfc -t "Testing in Progress"', description: 'Write warning to tag' },
+      { command: 'scanap', description: 'Scan for targets' },
+      { command: 'attack -t deauth', description: 'Launch deauth flood' }
+    ]
   }
 ]
 
@@ -484,6 +530,9 @@ onUnmounted(() => {
     clearInterval(demoUpdateInterval.value)
   }
 })
+
+provide('switchToView', switchToView)
+provide('serialConnection', serialConnection)
 </script>
 
 <style>

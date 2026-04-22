@@ -9,6 +9,7 @@ const isDemoMode = ref(false)
 const activeCommand = ref(null)
 let buffer = ''
 let keepReading = false
+const lineCallbacks = new Set()
 
 // Commands that run continuously until stopscan
 const continuousCommands = new Set([
@@ -96,7 +97,9 @@ export const useSerialConnection = () => {
 
             lines.forEach(line => {
               if (line.trim()) {
-                addToTerminal(line.trim())
+                const trimmed = line.trim()
+                addToTerminal(trimmed)
+                lineCallbacks.forEach(cb => cb(trimmed))
               }
             })
           }
@@ -264,6 +267,10 @@ export const useSerialConnection = () => {
     disconnect,
     activeCommand: computed(() => activeCommand.value),
     sendCommand,
-    sendRaw
+    sendRaw,
+    onLine: (cb) => {
+      lineCallbacks.add(cb)
+      return () => lineCallbacks.delete(cb)
+    }
   }
 }
