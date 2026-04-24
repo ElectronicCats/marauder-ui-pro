@@ -117,6 +117,7 @@ import PlatformAuthBar from './components/PlatformAuthBar.vue'
 import pwnterreyLogo from './assets/Pwnterrey-1024x379.png'
 import { useSerialConnection } from './utils/serialConnection'
 import { generateDemoData, generateDemoTerminalOutput } from './utils/demoData'
+
 const isDemoMode = ref(false)
 const demoUpdateInterval = ref(null)
 
