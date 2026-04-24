@@ -72,15 +72,15 @@
         <div v-if="writeType === 'vcard'" class="flex flex-col gap-3 mt-2">
           <div class="flex flex-col gap-1">
             <label class="text-xs text-zinc-500 uppercase">Full Name</label>
-            <input v-model="writeContent.vcard.name" type="text" placeholder="Omar" class="input-field text-sm" />
+            <input v-model="writeContent.vcard.name" type="text" placeholder="Full Name" class="input-field text-sm" />
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-xs text-zinc-500 uppercase">Phone Number</label>
-            <input v-model="writeContent.vcard.phone" type="text" placeholder="12345678" class="input-field text-sm" />
+            <input v-model="writeContent.vcard.phone" type="text" placeholder="+12345678" class="input-field text-sm" />
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-xs text-zinc-500 uppercase">Email Address</label>
-            <input v-model="writeContent.vcard.email" type="text" placeholder="omar@mail.com" class="input-field text-sm" />
+            <input v-model="writeContent.vcard.email" type="text" placeholder="mail@example.com" class="input-field text-sm" />
           </div>
         </div>
 
@@ -89,8 +89,35 @@
         </button>
       </div>
 
+      <!-- Social Presets Card -->
+      <div class="card p-6 flex flex-col gap-4 border-cyan-900/20 bg-cyan-950/5">
+        <h3 class="text-lg font-bold text-zinc-100 flex items-center gap-2 mb-2">
+          <span class="text-cyan-400">󰚙</span> Social Profiles
+        </h3>
+        
+        <div class="space-y-4">
+          <div v-for="social in socialList" :key="social.id" class="flex flex-col gap-1">
+            <label class="text-[10px] text-zinc-500 uppercase tracking-tighter">{{ social.label }}</label>
+            <div class="flex gap-2">
+              <input v-model="socials[social.id]" 
+                class="input-field text-xs py-1.5 flex-1" 
+                :placeholder="'Handle...'" />
+              <button @click="writeSocial(social.prefix + socials[social.id])" 
+                class="btn btn-accent px-3 text-sm hover:scale-105 active:scale-95 transition-transform"
+                title="Write to Tag">
+                󱠓
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-2 text-[10px] text-zinc-600 italic">
+          Tip: Enter your handles and click the icon to instantly program the tag.
+        </div>
+      </div>
+
       <!-- Result Card -->
-      <div class="card p-4 bg-black flex flex-col font-mono text-sm overflow-hidden border-zinc-800">
+      <div class="card p-4 bg-black flex flex-col font-mono text-sm overflow-hidden border-zinc-800 md:col-span-2">
         <div class="flex items-center justify-between mb-3 pb-2 border-b border-zinc-800/50">
           <span class="text-zinc-500 text-xs uppercase tracking-widest">Tag Memory Dump</span>
           <span class="text-[10px] text-zinc-600">NT3H2111 Block View</span>
@@ -110,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, inject, onMounted, onUnmounted } from 'vue'
 
 const serialConnection = inject('serialConnection')
 const isWorking = ref(false)
@@ -133,6 +160,24 @@ const writeTypes = [
   { id: 'text', label: 'Plain Text' },
   { id: 'vcard', label: 'Contact' }
 ]
+
+const socialList = [
+  { id: 'instagram', label: 'Instagram', prefix: 'URI:instagram.com/' },
+  { id: 'linkedin', label: 'LinkedIn', prefix: 'URI:linkedin.com/in/' },
+  { id: 'github', label: 'GitHub', prefix: 'URI:github.com/' }
+]
+
+const socials = ref({
+  instagram: 'omar',
+  linkedin: 'omar',
+  github: 'omar'
+})
+
+const writeSocial = (command) => {
+  if (confirm(`Write Social Profile to tag? Command: ${command}`)) {
+    serialConnection.sendCommand(command)
+  }
+}
 
 const chipStatusClass = computed(() => {
   if (chipStatus.value === 'READY') return 'text-emerald-400'
@@ -200,32 +245,38 @@ const handleWrite = async () => {
 }
 
 // Intercept terminal output to populate tagReadData
-let removeListener = null
+const lastProcessedIndex = ref(0)
+watch(() => serialConnection.terminalOutput.value, (newLines) => {
+  if (newLines.length <= lastProcessedIndex.value) {
+    if (newLines.length < lastProcessedIndex.value) lastProcessedIndex.value = 0
+    return
+  }
 
-onMounted(() => {
-  removeListener = serialConnection.onLine((line) => {
+  const linesToProcess = newLines.slice(lastProcessedIndex.value)
+  lastProcessedIndex.value = newLines.length
+
+  linesToProcess.forEach(line => {
+    const plain = line.replace(/<[^>]+>/g, '').trim()
+    if (!plain) return
+
     // Check for block data: e.g., "01    | 03 1D..."
-    if (/^\d{1,2}\s+\|/.test(line)) {
-      tagReadData.value += line + '\n'
+    if (/^\d{1,2}\s+\|/.test(plain)) {
+      tagReadData.value += plain + '\n'
     }
     
     // Update chip status based on detection messages
-    if (line.includes('FOUND!') || line.includes('[NFC] Device found') || line.includes('Chip Status: READY')) {
+    if (plain.includes('FOUND!') || plain.includes('[NFC] Device found') || plain.includes('Chip Status: READY')) {
       chipStatus.value = 'READY'
     }
-    if (line.includes('NT3H2111 not found') || line.includes('NFC_WRITE_ERROR')) {
+    if (plain.includes('NT3H2111 not found') || plain.includes('NFC_WRITE_ERROR')) {
       chipStatus.value = 'ERROR'
     }
-    if (line.includes('NFC_WRITE_SUCCESS')) {
+    if (plain.includes('NFC_WRITE_SUCCESS')) {
       // Auto-read after success to verify
       handleRead()
     }
   })
-})
-
-onUnmounted(() => {
-  if (removeListener) removeListener()
-})
+}, { deep: true })
 </script>
 
 <style scoped>

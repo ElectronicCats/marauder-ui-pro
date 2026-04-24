@@ -23,6 +23,7 @@
           class="btn btn-danger">
           Disconnect
         </button>
+        <PlatformAuthBar />
       </div>
     </div>
 
@@ -112,6 +113,7 @@ import NfcPanel from './components/NfcPanel.vue'
 import StoragePanel from './components/StoragePanel.vue'
 import WorkflowDialog from './components/WorkflowDialog.vue'
 import SystemUtilities from './components/SystemUtilities.vue'
+import PlatformAuthBar from './components/PlatformAuthBar.vue'
 import pwnterreyLogo from './assets/Pwnterrey-1024x379.png'
 import { useSerialConnection } from './utils/serialConnection'
 import { generateDemoData, generateDemoTerminalOutput } from './utils/demoData'
@@ -132,6 +134,8 @@ const viewOptions = [
 const switchToView = (view) => {
   rightContentView.value = view
 }
+provide('switchToView', switchToView)
+
 // Add mobile detection
 const isMobileDevice = ref(false)
 
@@ -154,6 +158,7 @@ onMounted(() => {
 })
 
 const serialConnection = useSerialConnection()
+provide('serialConnection', serialConnection)
 const selectedWorkflow = ref(null)
 const workflows = [
   {
@@ -418,48 +423,68 @@ const workflows = [
     ]
   },
   {
-    id: 'nfc-evil-portal-redirect',
-    name: 'Social Engineering Redirect',
-    description: 'Redirects NFC victims to the Evil Portal IP address.',
+    id: 'nfc-social-write',
+    name: 'NFC Social Link Write',
+    description: 'Program an NFC tag with a social link (Instagram, LinkedIn, etc.)',
     steps: [
-      { command: 'nfc scan', description: 'Ensure NFC chip is ready' },
-      { command: 'nfc -u http://192.168.4.1', description: 'Write portal URL to chip' },
       {
-        command: 'evilportal -w {filename}',
-        description: 'Start Evil Portal with selected file',
+        command: 'nfc -w uri https://{platform}.com/{handle}',
+        description: 'Write social URI to tag',
         requiresInput: true,
-        inputLabel: 'HTML Filename',
-        placeholder: 'login.html'
+        inputLabel: 'Platform (instagram/linkedin/github)',
+        placeholder: 'instagram',
+        requiresSecondInput: true,
+        secondInputLabel: 'Handle/Username',
+        secondPlaceholder: 'username'
       }
     ]
   },
   {
-    id: 'nfc-stealth-contact',
-    name: 'Stealth Contact Drop',
-    description: 'Writes a professional IT vCard to the tag and verifies it.',
+    id: 'gps-geofence',
+    name: 'Anti-Theft Geofence (Lost Mode)',
+    description: 'Arm a 20m radius geofence. Triggers emergency actions if moved.',
     steps: [
-      { command: 'nfc scan', description: 'Check chip' },
-      { command: 'nfc -v "IT Support,555-0199,admin@company.com"', description: 'Write fake IT vCard' },
-      { command: 'nfc read', description: 'Verify memory content' }
+      { command: 'gpsdata', description: 'Ensure GPS lock' },
+      { command: 'gps -g poi', description: 'Arm geofence at current location' }
     ]
   },
   {
-    id: 'nfc-audit-wipe',
-    name: 'Audit & Wipe',
-    description: 'Audits the current tag content and wipes it for security.',
+    id: 'binary-storage-export',
+    name: 'Binary SPIFFS Export',
+    description: 'Download files using HEX-dump to prevent PCAP corruption.',
     steps: [
-      { command: 'nfc read', description: 'Audit current content' },
-      { command: 'nfc -t " "', description: 'Wipe message with empty text' }
+      { command: 'spiffs ls', description: 'List files' },
+      {
+        command: 'spiffs dump {filename}',
+        description: 'Dump binary file as Hex',
+        requiresInput: true,
+        inputLabel: 'Full filename',
+        placeholder: '/settings.json'
+      }
     ]
   },
   {
-    id: 'nfc-triggered-deauth',
-    name: 'NFC Triggered Deauth',
-    description: 'Sets an NFC warning and launches a global deauth attack.',
+    id: 'live-map-tracking',
+    name: 'Start Live Map Tracking',
+    description: 'Activates continuous GPS NMEA output to feed the real-time map dashboard.',
     steps: [
-      { command: 'nfc -t "Testing in Progress"', description: 'Write warning to tag' },
-      { command: 'scanap', description: 'Scan for targets' },
-      { command: 'attack -t deauth', description: 'Launch deauth flood' }
+      { command: 'nmea', description: 'Start NMEA telemetry stream' }
+    ]
+  },
+  {
+    id: 'wifi-wardrive',
+    name: 'WiFi GPS Wardriving',
+    description: 'Scans for WiFi networks and logs them with GPS coordinates to a CSV file in Storage.',
+    steps: [
+      { command: 'wardrive', description: 'Start WiFi Wardriving' }
+    ]
+  },
+  {
+    id: 'bt-wardrive',
+    name: 'Bluetooth GPS Wardriving',
+    description: 'Scans for BLE devices and logs them with GPS coordinates.',
+    steps: [
+      { command: 'btwardrive', description: 'Start BT Wardriving' }
     ]
   }
 ]
@@ -533,9 +558,6 @@ onUnmounted(() => {
     clearInterval(demoUpdateInterval.value)
   }
 })
-
-provide('switchToView', switchToView)
-provide('serialConnection', serialConnection)
 </script>
 
 <style>
