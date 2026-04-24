@@ -11,8 +11,20 @@
         class="btn btn-accent" :class="{ 'opacity-50 cursor-not-allowed': entries.length === 0 }">
         Export CSV
       </button>
+      <button
+        @click="uploadToPlatform"
+        :disabled="uploadDisabled"
+        class="btn btn-primary"
+        :class="{ 'opacity-50 cursor-not-allowed': uploadDisabled }"
+        :title="uploadDisabledReason"
+      >
+        {{ uploadLoading ? 'Uploading…' : 'Upload to platform' }}
+      </button>
       <button @click="clearData" class="btn">Clear</button>
     </div>
+    <p v-if="uploadMessage" class="text-sm mb-2 font-mono" :class="uploadMessageClass">
+      {{ uploadMessage }}
+    </p>
 
     <!-- Table -->
     <div class="flex-1 min-h-0 overflow-auto border border-zinc-800 rounded bg-zinc-950/50">
@@ -57,15 +69,46 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useSerialConnection } from '../utils/serialConnection'
+import { useAuth } from '../composables/useAuth'
+import { buildWardriveCsvBlob, wardriveCsvFileName, buildWardriveCsvFile } from '../utils/wardriveCsv'
+import { uploadWardriveFiles } from '../utils/platformUpload'
 
 const { sendCommand, terminalOutput } = useSerialConnection()
+const { getToken, isAuthenticated } = useAuth()
 
 const entries = ref([])
 const csvHeader = ref('')
 const csvColumnHeader = ref('')
 const lastProcessedIndex = ref(0)
+
+const uploadLoading = ref(false)
+const uploadMessage = ref('')
+const uploadOk = ref(false)
+
+const uploadEnvOk = computed(
+  () => Boolean(import.meta.env.VITE_UPLOAD_URL && import.meta.env.VITE_DEVICE_SOURCE)
+)
+
+const uploadDisabled = computed(() => {
+  if (entries.value.length === 0 || uploadLoading.value) return true
+  if (!uploadEnvOk.value) return true
+  if (!isAuthenticated.value) return true
+  return false
+})
+
+const uploadDisabledReason = computed(() => {
+  if (entries.value.length === 0) return 'No wardrive rows to upload'
+  if (!uploadEnvOk.value) return 'Set VITE_UPLOAD_URL and VITE_DEVICE_SOURCE in .env'
+  if (!isAuthenticated.value) return 'Sign in via Platform in the header'
+  return ''
+})
+
+const uploadMessageClass = computed(() => {
+  if (uploadOk.value) return 'text-emerald-400'
+  return 'text-red-400'
+})
 
 const startWardrive = async (command) => {
   await sendCommand(command)
@@ -75,6 +118,7 @@ const clearData = () => {
   entries.value = []
   csvHeader.value = ''
   csvColumnHeader.value = ''
+  uploadMessage.value = ''
 }
 
 const parseWardriveRow = (plain) => {
@@ -111,8 +155,6 @@ watch(() => terminalOutput.value, (newLines) => {
   const linesToProcess = newLines.slice(lastProcessedIndex.value)
   lastProcessedIndex.value = newLines.length
 
-  let changed = false
-
   linesToProcess.forEach(line => {
     const plain = line.replace(/<[^>]+>/g, '').trim()
     if (!plain) return
@@ -133,7 +175,6 @@ watch(() => terminalOutput.value, (newLines) => {
     const entry = parseWardriveRow(plain)
     if (entry) {
       entries.value = [...entries.value, entry]
-      changed = true
     }
   })
 }, { deep: true })
@@ -141,20 +182,33 @@ watch(() => terminalOutput.value, (newLines) => {
 const exportCsv = () => {
   if (entries.value.length === 0) return
 
-  const header = csvHeader.value || 'WigleWifi-1.4,appRelease=ESP32Marauder'
-  const columns = csvColumnHeader.value || 'MAC,SSID,AuthMode,FirstSeen,Channel,RSSI,CurrentLatitude,CurrentLongitude,AltitudeMeters,AccuracyMeters,Type'
-
-  const rows = entries.value.map(e =>
-    `${e.mac},${e.ssid},${e.auth},${e.firstSeen},${e.channel},${e.rssi},${e.lat},${e.lon},${e.alt},${e.accuracy},${e.type}`
-  )
-
-  const csv = [header, columns, ...rows].join('\n')
-  const blob = new Blob([csv], { type: 'text/csv' })
+  const blob = buildWardriveCsvBlob(entries.value, csvHeader.value, csvColumnHeader.value)
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `wardrive_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`
+  a.download = wardriveCsvFileName()
   a.click()
   URL.revokeObjectURL(url)
+}
+
+const uploadToPlatform = async () => {
+  if (uploadDisabled.value) return
+
+  uploadMessage.value = ''
+  uploadOk.value = false
+  uploadLoading.value = true
+
+  try {
+    const file = buildWardriveCsvFile(entries.value, csvHeader.value, csvColumnHeader.value)
+    const token = getToken()
+    await uploadWardriveFiles([file], token)
+    uploadOk.value = true
+    uploadMessage.value = 'Upload completed successfully.'
+  } catch (e) {
+    uploadOk.value = false
+    uploadMessage.value = e?.message || 'Upload failed'
+  } finally {
+    uploadLoading.value = false
+  }
 }
 </script>

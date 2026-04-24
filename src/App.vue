@@ -23,6 +23,7 @@
           class="btn btn-danger">
           Disconnect
         </button>
+        <PlatformAuthBar />
       </div>
     </div>
 
@@ -110,6 +111,7 @@ import WardrivePanel from './components/WardrivePanel.vue'
 import StoragePanel from './components/StoragePanel.vue'
 import WorkflowDialog from './components/WorkflowDialog.vue'
 import SystemUtilities from './components/SystemUtilities.vue'
+import PlatformAuthBar from './components/PlatformAuthBar.vue'
 import pwnterreyLogo from './assets/Pwnterrey-1024x379.png'
 import { useSerialConnection } from './utils/serialConnection'
 import { generateDemoData, generateDemoTerminalOutput } from './utils/demoData'
