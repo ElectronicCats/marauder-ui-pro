@@ -16,6 +16,12 @@
         Sys Info
       </button>
       <button
+        @click="switchToView('storage')"
+        class="btn btn-accent text-xs py-2 col-span-2"
+      >
+        Storage
+      </button>
+      <button
         @click="runCommand('clearlist -a', true)"
         class="btn bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs py-2"
       >
@@ -103,10 +109,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, inject } from 'vue'
 import { useSerialConnection } from '../utils/serialConnection'
 
 const { sendCommand } = useSerialConnection()
+const switchToView = inject('switchToView')
 
 const channel = ref(1)
 const ledColor = ref('#00ff00')
