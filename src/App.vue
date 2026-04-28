@@ -83,7 +83,6 @@
         <!-- Content Panel -->
         <div class="flex-1 card p-4 min-h-0">
           <AccessPointTable v-if="rightContentView === 'ap'" />
-          <BluetoothDeviceTable v-else-if="rightContentView === 'bt'" />
           <NfcPanel v-else-if="rightContentView === 'nfc'" />
           <GpsPanel v-else-if="rightContentView === 'gps'" />
           <WardrivePanel v-else-if="rightContentView === 'wardrive'" />
@@ -106,7 +105,6 @@ import MobileBlocker from './components/MobileBlocker.vue'
 import CommandBuilder from './components/CommandBuilder.vue'
 import TerminalOutput from './components/TerminalOutput.vue'
 import AccessPointTable from './components/AccessPointTable.vue'
-import BluetoothDeviceTable from './components/BluetoothDeviceTable.vue'
 import GpsPanel from './components/GpsPanel.vue'
 import WardrivePanel from './components/WardrivePanel.vue'
 import NfcPanel from './components/NfcPanel.vue'
@@ -125,7 +123,6 @@ const demoUpdateInterval = ref(null)
 const rightContentView = ref('ap')
 const viewOptions = [
   { key: 'ap', label: 'WiFi APs' },
-  { key: 'bt', label: 'Bluetooth' },
   { key: 'nfc', label: 'NFC' },
   { key: 'gps', label: 'GPS' },
   { key: 'wardrive', label: 'Wardrive' },
@@ -481,11 +478,36 @@ const workflows = [
     ]
   },
   {
-    id: 'bt-wardrive',
-    name: 'Bluetooth GPS Wardriving',
-    description: 'Scans for BLE devices and logs them with GPS coordinates.',
+    id: 'nfc-wifi-phishing',
+    name: 'NFC WiFi Phishing (Auto Portal)',
+    description: 'Writes WiFi credentials to an NFC tag and immediately starts an Evil Portal with the same SSID.',
     steps: [
-      { command: 'btwardrive', description: 'Start BT Wardriving' }
+      {
+        command: 'clearap -s',
+        description: 'Clear existing SSID list'
+      },
+      {
+        command: 'WIFI:{ssid}|{pass}|WPA2',
+        description: 'Program NFC tag with WiFi credentials',
+        requiresInput: true,
+        inputLabel: 'Target SSID',
+        placeholder: 'Free_WiFi',
+        requiresSecondInput: true,
+        secondInputLabel: 'WiFi Password',
+        secondPlaceholder: 'password123'
+      },
+      {
+        command: 'ssid -a -n "{ssid}"',
+        description: 'Set Marauder SSID for Evil Portal'
+      },
+      {
+        command: 'select -s all',
+        description: 'Select all SSIDs for attack'
+      },
+      {
+        command: 'evilportal -c start',
+        description: 'Launch Evil Portal'
+      }
     ]
   }
 ]

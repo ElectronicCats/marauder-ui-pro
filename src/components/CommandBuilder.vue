@@ -9,10 +9,10 @@
           Stop
         </button>
         <button 
-          @click="sendCommand(props.rightContentView === 'bt' ? 'list -t' : 'list -a')"
+          @click="sendCommand('list -a')"
           class="btn btn-primary flex-1"
         >
-          {{ props.rightContentView === 'bt' ? 'List Airtags' : 'List APs' }}
+          List APs
         </button>
       </div>
   
@@ -28,37 +28,6 @@
         </button>
       </div>
 
-      <!-- BLE Spam Buttons (only in Bluetooth view) -->
-      <div v-if="props.rightContentView === 'bt'" class="grid grid-cols-2 gap-2 mt-2">
-        <button @click="sendCommand('blespam -t apple')"
-          class="btn btn-accent">
-          Spam Apple
-        </button>
-        <button @click="sendCommand('blespam -t windows')"
-          class="btn btn-accent">
-          Spam Swift
-        </button>
-        <button @click="sendCommand('blespam -t samsung')"
-          class="btn btn-accent">
-          Spam Samsung
-        </button>
-        <button @click="sendCommand('blespam -t google')"
-          class="btn btn-accent">
-          Spam Google
-        </button>
-        <button @click="sendCommand('blespam -t flipper')"
-          class="btn btn-accent">
-          Spam Flipper
-        </button>
-        <button @click="sendCommand('blespam -t all')"
-          class="btn btn-accent col-span-2">
-          Spam All
-        </button>
-        <button @click="sendCommand('spoofat -t airtag')"
-          class="btn btn-danger col-span-2 mt-2">
-          BLE Spoof (AirTag)
-        </button>
-      </div>
   
       <!-- Custom Command -->
       <div class="flex space-x-2">
@@ -106,16 +75,8 @@
     { label: 'Wardrive', action: 'wardrive' }
   ]
 
-  const btCommands = [
-    { label: 'Scan Bluetooth', command: 'sniffbt' },
-    { label: 'Scan Flipper', command: 'sniffbt -t flipper' },
-    { label: 'Scan Airtag', command: 'sniffbt -t airtag' },
-    { label: 'BT Spoof', command: 'spoofat -t apple' },
-    { label: 'Wardrive', action: 'wardrive' }
-  ]
-
   const scanCommands = computed(() => {
-    return props.rightContentView === 'bt' ? btCommands : wifiCommands
+    return wifiCommands
   })
 
   const sendCommand = async (cmd) => {

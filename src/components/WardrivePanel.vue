@@ -3,7 +3,6 @@
     <!-- Controls -->
     <div class="flex flex-wrap items-center gap-2">
       <button @click="startWardrive('wardrive -serial')" class="btn btn-primary">WiFi Wardrive</button>
-      <button @click="startWardrive('btwardrive')" class="btn btn-primary">BLE Wardrive</button>
       <button @click="sendCommand('stopscan')" class="btn btn-danger">Stop</button>
       <div class="flex-1"></div>
       <span class="text-sm text-zinc-500 font-mono">{{ entries.length }} networks mapped</span>
@@ -57,7 +56,7 @@
         <tbody>
           <tr v-if="entries.length === 0">
             <td colspan="9" class="px-4 py-8 text-center text-zinc-600">
-              No wardrive data yet. Press "WiFi Wardrive" or "BLE Wardrive" to start.
+              No wardrive data yet. Press "WiFi Wardrive" to start.
             </td>
           </tr>
           <tr v-for="(e, i) in entries" :key="i"

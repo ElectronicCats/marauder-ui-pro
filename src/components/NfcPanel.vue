@@ -33,7 +33,7 @@
         
         <div class="flex flex-col gap-3">
           <label class="text-sm text-zinc-400">Record Type</label>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="grid grid-cols-4 gap-2">
             <button 
               v-for="type in writeTypes" 
               :key="type.id"
@@ -81,6 +81,27 @@
           <div class="flex flex-col gap-1">
             <label class="text-xs text-zinc-500 uppercase">Email Address</label>
             <input v-model="writeContent.vcard.email" type="text" placeholder="mail@example.com" class="input-field text-sm" />
+          </div>
+        </div>
+
+        <!-- WiFi Input -->
+        <div v-if="writeType === 'wifi'" class="flex flex-col gap-3 mt-2">
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-zinc-500 uppercase">Network SSID</label>
+            <input v-model="writeContent.wifi.ssid" type="text" placeholder="Network Name" class="input-field text-sm font-mono" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-zinc-500 uppercase">Password</label>
+            <input v-model="writeContent.wifi.pass" type="text" placeholder="WPA/WPA2 Key" class="input-field text-sm font-mono" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-zinc-500 uppercase">Security Type</label>
+            <select v-model="writeContent.wifi.auth" class="input-field text-sm">
+              <option value="WPA2">WPA2 (Standard)</option>
+              <option value="WPA">WPA</option>
+              <option value="WEP">WEP</option>
+              <option value="nopass">None (Open)</option>
+            </select>
           </div>
         </div>
 
@@ -152,25 +173,43 @@ const writeContent = ref({
     name: '',
     phone: '',
     email: ''
+  },
+  wifi: {
+    ssid: '',
+    pass: '',
+    auth: 'WPA2'
   }
 })
 
 const writeTypes = [
-  { id: 'url', label: 'URL Link' },
-  { id: 'text', label: 'Plain Text' },
-  { id: 'vcard', label: 'Contact' }
+  { id: 'url', label: 'URL' },
+  { id: 'text', label: 'Text' },
+  { id: 'vcard', label: 'Contact' },
+  { id: 'wifi', label: 'WiFi' }
 ]
 
 const socialList = [
-  { id: 'instagram', label: 'Instagram', prefix: 'URI:instagram.com/' },
-  { id: 'linkedin', label: 'LinkedIn', prefix: 'URI:linkedin.com/in/' },
-  { id: 'github', label: 'GitHub', prefix: 'URI:github.com/' }
+  { id: 'instagram', label: 'Instagram', prefix: 'URI:https://instagram.com/' },
+  { id: 'tiktok', label: 'TikTok', prefix: 'URI:https://tiktok.com/@' },
+  { id: 'whatsapp', label: 'WhatsApp', prefix: 'URI:https://wa.me/' },
+  { id: 'telegram', label: 'Telegram', prefix: 'URI:https://t.me/' },
+  { id: 'youtube', label: 'YouTube', prefix: 'URI:https://youtube.com/@' },
+  { id: 'linkedin', label: 'LinkedIn', prefix: 'URI:https://linkedin.com/in/' },
+  { id: 'github', label: 'GitHub', prefix: 'URI:https://github.com/' },
+  { id: 'facebook', label: 'Facebook', prefix: 'URI:https://facebook.com/' },
+  { id: 'paypal', label: 'PayPal', prefix: 'URI:https://paypal.me/' }
 ]
 
 const socials = ref({
-  instagram: 'omar',
-  linkedin: 'omar',
-  github: 'omar'
+  instagram: '',
+  tiktok: '',
+  whatsapp: '',
+  telegram: '',
+  youtube: '',
+  linkedin: '',
+  github: '',
+  facebook: '',
+  paypal: ''
 })
 
 const writeSocial = (command) => {
@@ -195,6 +234,7 @@ const canWrite = computed(() => {
   if (writeType.value === 'url') return writeContent.value.url.length > 0
   if (writeType.value === 'text') return writeContent.value.text.length > 0
   if (writeType.value === 'vcard') return writeContent.value.vcard.name.length > 0
+  if (writeType.value === 'wifi') return writeContent.value.wifi.ssid.length > 0
   return false
 })
 
@@ -225,20 +265,43 @@ const handleRead = async () => {
 const handleWrite = async () => {
   isWorking.value = true
   let cmd = ''
+  let ssid = ''
+  
   if (writeType.value === 'url') {
-    // Use DragonJar direct command format
     cmd = `URI:${writeContent.value.url}`
   } else if (writeType.value === 'text') {
-    // Use DragonJar direct command format
     cmd = `TEXT:${writeContent.value.text}`
   } else if (writeType.value === 'vcard') {
-    // Use DragonJar direct command format with pipe | separator
     const vc = writeContent.value.vcard
     cmd = `VCARD:${vc.name}|${vc.phone}|${vc.email}`
+  } else if (writeType.value === 'wifi') {
+    const wf = writeContent.value.wifi
+    ssid = wf.ssid
+    cmd = `WIFI:${wf.ssid}|${wf.pass}|${wf.auth}`
   }
 
   try {
+    // 0. If WiFi, clear SSID list first to avoid conflicts
+    if (writeType.value === 'wifi') {
+      await serialConnection.sendCommand('clearap -s')
+    }
+
+    // 1. Write the Tag
     await serialConnection.sendCommand(cmd)
+    
+    // 2. If it was WiFi, auto-start Evil Portal
+    if (writeType.value === 'wifi' && ssid) {
+      // Small delay to let the NFC write finish
+      await new Promise(r => setTimeout(r, 1000))
+      
+      // We set the SSID for the portal and start it
+      // Note: We use ssid -a -n to set a custom SSID in the list for the portal
+      await serialConnection.sendCommand(`ssid -a -n "${ssid}"`)
+      await serialConnection.sendCommand(`select -s all`)
+      await serialConnection.sendCommand(`evilportal -c start`)
+      
+      alert(`Tag written & Evil Portal started with SSID: ${ssid}`)
+    }
   } finally {
     isWorking.value = false
   }
