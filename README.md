@@ -1,130 +1,81 @@
-# marauder-ui
+# ⚡ Marauder UI Pro
 
-![Marauder Web Interface Screenshot](docs/homepage.png)
+![Pwnterrey Logo](Pwnterrey-1024x1010.png)
 
-A modern web interface for the [ESP32 Marauder](https://github.com/justcallmekoko/ESP32Marauder) firmware. This project provides a user-friendly way to interact with your Marauder device through a web browser.
+A professional, high-performance web dashboard for the [ESP32 Marauder](https://github.com/justcallmekoko/ESP32Marauder) firmware. Specifically optimized for the **Badge Pwnterrey 2026** and the ESP32-C5 architecture.
 
 🌐 **[Live Demo](https://mikystars.github.io/marauder-ui-pro/)**
 
-> ~~This entire project~~ Part of this project, including the code and this README, has been written by Claude AI assistant. There is algo a bunch of code made by hand and/or with the help of GitHub Copilot.
+---
 
-## Features
+## 💎 Pro Features
 
-- 🔌 Serial connection management
-- 📡 Real-time AP and Bluetooth scanning and monitoring
-- 👥 Station detection and tracking
-- 📊 Dynamic AP and station list with sorting and filtering
-- 🖥️ Interactive terminal output
-- 🎨 Modern neobrutalist design
-- 📱 Responsive layout
-- ⌨️ Command history
-- 🔍 Advanced filtering and sorting options
+Beyond basic scanning, the **Pro** version introduces advanced tactical workflows:
 
-## Technical Details
+### 📍 GPS & Tactical Mapping
+- **Live Map Visualization**: Integrated OpenStreetMap to track wardriving progress in real-time.
+- **Satellite Telemetry**: Monitor signal quality, constellation count (GPS/GLONASS/GALILEO), and precise coordinates.
+- **Geofencing (Lost Mode)**: Set a safety perimeter. Visual and logic alerts if the device is moved outside the allowed zone.
 
-- Built with Vue 3 and Tailwind CSS
-- Uses Web Serial API for device communication
-- Reactive state management
-- Real-time data processing
-- Modular component architecture
+### 📁 Advanced Storage Manager
+- **File Browser**: Full access to SPIFFS and SD Card filesystems.
+- **Binary Downloads**: Optimized transfer to download `.pcap`, `.log`, and `.json` files directly to your browser for analysis in Wireshark.
+- **System Stats**: Monitor memory usage and storage health in real-time.
 
-## Requirements
+### 🎣 Evil Portal Orchestrator
+- **Phishing Workflows**: Select from pre-loaded portals (Google, Starbucks, etc.) and deploy with one click.
+- **Live Logs**: Watch captured credentials and connected clients as they interact with the portal.
 
-- A browser supporting the Web Serial API (Chrome, Edge)
-- An ESP32 device running the [Marauder firmware](https://github.com/justcallmekoko/ESP32Marauder)
+### 🏷️ NFC & Social Engineering
+- **NFC Toolset**: Interface to read and write NDEF tags.
+- **Social Link Write**: Quickly program tags with social media profiles or malicious URLs.
+- **Portal Sync**: Automatically write the Evil Portal URL to the badge's NFC chip for seamless "Tap-to-Join" attacks.
 
-## Development
+### 🍎 Optimized BLE Attacks
+- **Sour Apple & Fast Pair**: Specialized timing for the ESP32-C5 single-core architecture.
+- **Smart Spamming**: Categorized attacks for iOS, Android, and Windows devices.
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/marauder-ui-pro.git
-cd marauder-ui
-```
+---
 
-2. Install dependencies:
-```bash
-npm install
-```
+## 🎨 Design Philosophy: Neobrutalism
+Built with a "Cyber-Tactical" aesthetic using **Vue 3** and **Tailwind CSS**. The interface prioritizes high contrast, responsiveness, and minimal latency for field operations.
 
-3. Run development server:
-```bash
-npm run dev
-```
+---
 
-4. Build for production:
-```bash
-npm run build
-```
+## 🛠️ Requirements
+- **Hardware**: ESP32-C5 / ESP32-S3 / ESP32 (Recommended: Badge Pwnterrey 2026).
+- **Browser**: Chrome or Edge (Web Serial API support is mandatory).
+- **Firmware**: Marauder Firmware (v1.0.0+ for Pro features).
 
-## Usage
+---
 
-1. Connect your Marauder device to your computer
-2. Open the web interface
-3. Click "Connect" and select your device from the serial port list
-4. Use the command builder or enter custom commands
-5. Monitor results in the AP list and terminal output
+## 🚀 Quick Start
 
-## Commands
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+2. **Launch Dashboard**:
+   ```bash
+   npm run dev
+   ```
+3. **Connect**:
+   Open the local URL, click **Connect**, and select your device's COM port.
 
-The interface supports all Marauder commands, including:
+---
 
-- `scanap` - Scan for access points
-- `scansta` - Scan for stations
-- `stopscan` - Stop any ongoing scan
-- `list -a` - List detected access points
-- `sniffbeacon` - Sniff beacon frames
-- `sniffdeauth` - Sniff deauth frames
-- `sniffpmkid` - Sniff PMKID
-- And many more...
+## ⌨️ Tactical Workflows (Macros)
+The Pro UI includes a "Workflow" list that automates complex command sequences:
+- **"Start Wardrive"**: Configures GPS, checks signal, and starts `btwardrive` with one tap.
+- **"Evil Portal Deploy"**: Sets the SSID, selects the portal, and starts the sniffing engine.
+- **"Lost Mode"**: Arms the geofence and starts periodic GPS reporting.
 
-## Features
+---
 
-### Access Point Monitoring
-- Real-time AP detection
-- Signal strength indicators
-- Channel information
-- Connected stations tracking
-- Last seen timestamps
+## 🤝 Credits & Ecosystem
+- **Hardware & Support**: [Electronic Cats](https://electroniccats.com) 😼
+- **Original Firmware**: [justcallmekoko](https://github.com/justcallmekoko)
+- **UI Maintenance**: [michelangelomo](https://github.com/michelangelomo) & [Mikystars](https://github.com/Mikystars)
 
-### Station Tracking
-- Station-AP relationships
-- MAC address display
-- Station IDs
-- Last seen information
-
-### Interface Features
-- Command history
-- Terminal output
-- Compact and detailed views
-- Search and filter capabilities
-- Sorting options
-
-### Bluetooth Monitoring
-- Real-time BT detection
-- Signal strength indicators
-- MAC address display
-- BT name display
-- Flipper detection
-- Airtag detection
-- Wardrive
-
-### Bluetooth Attacking
-- BLE Spam Apple Sour
-- BLE Spam Switpair
-- BLE Spam Samsung
-- BLE Spam Flipper
-- BLE Spam All
-
-## Contributing
-
-Feel free to submit issues and enhancement requests!
-
-## Credits
-
-- ESP32 Marauder firmware by [justcallmekoko](https://github.com/justcallmekoko)
-- Interface design and implementation by Claude AI
-- Project maintenance by: [michelangelomo](https://github.com/michelangelomo) and [Mikystars](https://github.com/Mikystars)
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+---
+*Developed for the Offensive Security community.* 💀
