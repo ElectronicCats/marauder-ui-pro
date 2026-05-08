@@ -4,7 +4,7 @@
 
 A professional, high-performance web dashboard for the [ESP32 Marauder](https://github.com/justcallmekoko/ESP32Marauder) firmware. Specifically optimized for the **Badge Pwnterrey 2026** and the ESP32-C5 architecture.
 
-
+🌐 **[Live Demo](https://ElectronicCats.github.io/marauder-ui-pro/)**
 
 ---
 

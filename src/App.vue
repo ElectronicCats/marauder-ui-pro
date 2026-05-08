@@ -4,23 +4,23 @@
 
     <!-- Header -->
     <div
-      class="bg-black rounded-lg border border-zinc-800 shadow-lg p-2 px-4 flex justify-between items-center bg-zinc-900/50 backdrop-blur-md">
-      <img :src="pwnterreyLogo" alt="Pwnterrey" class="h-12 object-contain" />
-      <div class="flex items-center space-x-4">
+      class="bg-black rounded-lg border border-zinc-800 shadow-lg p-2 px-4 flex flex-col md:flex-row justify-between items-center gap-4 bg-zinc-900/50 backdrop-blur-md">
+      <img :src="pwnterreyLogo" alt="Pwnterrey" class="h-10 md:h-12 object-contain" />
+      <div class="flex items-center space-x-2 md:space-x-4">
         <!-- Demo Mode Button -->
         <button v-if="!serialConnection.isConnected.value" @click="toggleDemoMode"
-          class="btn"
+          class="btn text-sm px-3 py-1.5"
           :class="isDemoMode ? 'btn-primary' : ''">
           {{ isDemoMode ? 'Exit Demo' : 'Try Demo' }}
         </button>
 
-        <span class="text-sm text-zinc-400">Status:</span>
+        <span class="hidden sm:inline text-sm text-zinc-400">Status:</span>
         <button @click="handleConnect" v-if="!serialConnection.isConnected.value"
-          class="btn btn-primary">
+          class="btn btn-primary text-sm px-3 py-1.5">
           Connect
         </button>
         <button @click="handleDisconnect" v-if="serialConnection.isConnected.value"
-          class="btn btn-danger">
+          class="btn btn-danger text-sm px-3 py-1.5">
           Disconnect
         </button>
         <PlatformAuthBar />
@@ -28,9 +28,9 @@
     </div>
 
     <!-- Main Content -->
-    <div class="flex gap-4">
+    <div class="flex flex-col lg:flex-row gap-4">
       <!-- Left Sidebar -->
-      <div class="w-1/4 flex flex-col gap-4">
+      <div class="w-full lg:w-1/4 flex flex-col gap-4">
         <!-- Command Builder -->
         <div class="card p-4">
           <CommandBuilder :rightContentView="rightContentView" />
@@ -56,10 +56,10 @@
       <!-- Right Content -->
       <div class="flex-1 flex flex-col gap-4">
         <!-- View Toggle -->
-        <div class="mb-2 flex justify-end gap-2">
+        <div class="mb-2 flex flex-wrap justify-center lg:justify-end gap-2">
           <button v-for="v in viewOptions" :key="v.key"
             @click="rightContentView = v.key"
-            class="btn"
+            class="btn text-xs md:text-sm px-2 py-1 md:px-4 md:py-2"
             :class="rightContentView === v.key ? 'btn-accent' : ''">
             {{ v.label }}
           </button>

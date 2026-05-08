@@ -42,15 +42,15 @@
       <table class="w-full text-sm">
         <thead class="bg-zinc-900 sticky top-0 z-10">
           <tr>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold w-12 text-zinc-400">#</th>
+            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold w-10 md:w-12 text-zinc-400">#</th>
             <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold text-zinc-400">MAC</th>
             <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold text-zinc-400">SSID/Name</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold text-zinc-400">Auth</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold w-12 text-zinc-400">Ch</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold w-16 text-zinc-400">RSSI</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold text-zinc-400">Lat</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold text-zinc-400">Lon</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold w-16 text-zinc-400">Type</th>
+            <th class="hidden md:table-cell px-2 py-2 text-left border-b border-zinc-800 font-bold text-zinc-400">Auth</th>
+            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold w-10 md:w-12 text-zinc-400">Ch</th>
+            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold w-12 md:w-16 text-zinc-400">RSSI</th>
+            <th class="hidden sm:table-cell px-2 py-2 text-left border-b border-zinc-800 font-bold text-zinc-400">Lat</th>
+            <th class="hidden sm:table-cell px-2 py-2 text-left border-b border-zinc-800 font-bold text-zinc-400">Lon</th>
+            <th class="hidden lg:table-cell px-2 py-2 text-left border-b border-zinc-800 font-bold w-16 text-zinc-400">Type</th>
           </tr>
         </thead>
         <tbody>
@@ -61,15 +61,15 @@
           </tr>
           <tr v-for="(e, i) in entries" :key="i"
             class="hover:bg-zinc-800/50 border-b border-zinc-900">
-            <td class="px-2 py-1 font-mono text-zinc-500">{{ i + 1 }}</td>
-            <td class="px-2 py-1 font-mono text-zinc-400">{{ e.mac }}</td>
-            <td class="px-2 py-1 font-medium text-zinc-200">{{ e.ssid || '-' }}</td>
-            <td class="px-2 py-1 text-zinc-400 text-xs">{{ e.auth }}</td>
-            <td class="px-2 py-1 font-mono text-zinc-400">{{ e.channel }}</td>
-            <td class="px-2 py-1 font-mono text-emerald-500">{{ e.rssi }}</td>
-            <td class="px-2 py-1 font-mono text-zinc-400">{{ e.lat }}</td>
-            <td class="px-2 py-1 font-mono text-zinc-400">{{ e.lon }}</td>
-            <td class="px-2 py-1 text-xs" :class="e.type === 'WIFI' ? 'text-cyan-400' : 'text-violet-400'">
+            <td class="px-2 py-1 font-mono text-zinc-500 text-[10px] md:text-xs">{{ i + 1 }}</td>
+            <td class="px-2 py-1 font-mono text-zinc-400 text-[10px] md:text-xs">{{ e.mac }}</td>
+            <td class="px-2 py-1 font-medium text-zinc-200 text-xs">{{ e.ssid || '-' }}</td>
+            <td class="hidden md:table-cell px-2 py-1 text-zinc-400 text-[10px]">{{ e.auth }}</td>
+            <td class="px-2 py-1 font-mono text-zinc-400 text-[10px] md:text-xs">{{ e.channel }}</td>
+            <td class="px-2 py-1 font-mono text-emerald-500 text-[10px] md:text-xs">{{ e.rssi }}</td>
+            <td class="hidden sm:table-cell px-2 py-1 font-mono text-zinc-400 text-[10px]">{{ e.lat }}</td>
+            <td class="hidden sm:table-cell px-2 py-1 font-mono text-zinc-400 text-[10px]">{{ e.lon }}</td>
+            <td class="hidden lg:table-cell px-2 py-1 text-[10px]" :class="e.type === 'WIFI' ? 'text-cyan-400' : 'text-violet-400'">
               {{ e.type }}
             </td>
           </tr>

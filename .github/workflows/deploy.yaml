@@ -33,6 +33,8 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Add .nojekyll
+        run: touch dist/.nojekyll
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact

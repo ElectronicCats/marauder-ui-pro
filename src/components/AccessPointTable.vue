@@ -5,8 +5,8 @@
       <!-- Title and actions -->
       <div class="flex justify-between items-center">
         <div class="flex items-center space-x-2">
-          <h2 class="text-xl font-bold text-zinc-100">Access Points</h2>
-          <span class="text-sm text-zinc-500">({{ accessPoints.size }} devices)</span>
+          <h2 class="text-lg md:text-xl font-bold text-zinc-100">Access Points</h2>
+          <span class="text-[10px] md:text-sm text-zinc-500">({{ accessPoints.size }} devices)</span>
         </div>
         <div class="flex items-center space-x-2">
           <button @click="refreshList"
@@ -22,25 +22,27 @@
       </div>
 
       <!-- Filters -->
-      <div class="flex space-x-4">
+      <div class="flex flex-col md:flex-row gap-2">
         <div class="flex-1">
-          <input type="text" v-model="search" placeholder="Search by ESSID, BSSID, or Station..."
-            class="input-field w-full">
+          <input type="text" v-model="search" placeholder="Search..."
+            class="input-field w-full text-xs">
         </div>
-        <div class="flex space-x-2">
-          <button v-for="view in viewOptions" :key="view.id" @click="currentView = view.id"
-            class="btn"
-            :class="currentView === view.id ? 'btn-primary' : ''">
-            {{ view.label }}
-          </button>
+        <div class="flex justify-between md:justify-start gap-2">
+          <div class="flex space-x-1">
+            <button v-for="view in viewOptions" :key="view.id" @click="currentView = view.id"
+              class="btn text-[10px] md:text-xs px-2"
+              :class="currentView === view.id ? 'btn-primary' : ''">
+              {{ view.label }}
+            </button>
+          </div>
+          <select v-model="sortBy"
+            class="input-field text-[10px] md:text-xs py-0 h-7 md:h-auto">
+            <option value="rssi">Signal</option>
+            <option value="stations">Stations</option>
+            <option value="essid">Name</option>
+            <option value="channel">Channel</option>
+          </select>
         </div>
-        <select v-model="sortBy"
-          class="input-field">
-          <option value="rssi">Sort by Signal</option>
-          <option value="stations">Sort by Stations</option>
-          <option value="essid">Sort by Name</option>
-          <option value="channel">Sort by Channel</option>
-        </select>
       </div>
     </div>
 
@@ -106,45 +108,42 @@
       <table v-else class="w-full text-sm">
         <thead class="bg-zinc-900 sticky top-0 z-10">
           <tr>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold w-12 text-zinc-400">#</th>
+            <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold w-10 md:w-12 text-zinc-400">#</th>
             <th class="px-2 py-2 text-left border-b border-zinc-800 font-bold text-zinc-400">ESSID</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 w-16 font-bold text-zinc-400">CH</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 w-16 font-bold text-zinc-400">RSSI</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 w-32 font-bold text-zinc-400">BSSID</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 w-16 font-bold text-zinc-400">STA</th>
-            <th class="px-2 py-2 text-left border-b border-zinc-800 w-24 font-bold text-zinc-400">Last Seen</th>
+            <th class="px-2 py-2 text-left border-b border-zinc-800 w-12 md:w-16 font-bold text-zinc-400">CH</th>
+            <th class="px-2 py-2 text-left border-b border-zinc-800 w-12 md:w-16 font-bold text-zinc-400">RSSI</th>
+            <th class="hidden sm:table-cell px-2 py-2 text-left border-b border-zinc-800 w-24 md:w-32 font-bold text-zinc-400">BSSID</th>
+            <th class="px-2 py-2 text-left border-b border-zinc-800 w-12 md:w-16 font-bold text-zinc-400">STA</th>
+            <th class="hidden md:table-cell px-2 py-2 text-left border-b border-zinc-800 w-24 font-bold text-zinc-400">Last Seen</th>
           </tr>
         </thead>
         <tbody>
           <template v-for="ap in sortedAPs" :key="ap.bssid">
             <tr class="hover:bg-zinc-800/50 border-b border-zinc-900 cursor-pointer" :class="getSignalClass(ap.rssi)"
               @click="ap.showStations = !ap.showStations">
-              <td class="px-2 py-1 font-mono text-zinc-500 text-xs">{{ ap.index }}</td>
+              <td class="px-2 py-1 font-mono text-zinc-500 text-[10px] md:text-xs">{{ ap.index }}</td>
               <td class="px-2 py-1">
                 <div class="flex items-center">
-                  <span class="font-medium text-zinc-200">{{ ap.essid }}</span>
-                  <span v-if="ap.isSelected" class="ml-1 text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-900/50 px-1 rounded uppercase font-bold">
+                  <span class="font-medium text-zinc-200 text-xs md:text-sm">{{ ap.essid }}</span>
+                  <span v-if="ap.isSelected" class="ml-1 text-[8px] md:text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-900/50 px-1 rounded uppercase font-bold">
                     selected
-                  </span>
-                  <span v-if="ap.isHidden" class="ml-1 text-[10px] bg-zinc-800 text-zinc-500 px-1 rounded uppercase font-bold">
-                    hidden
                   </span>
                 </div>
               </td>
-              <td class="px-2 py-1 text-zinc-400 text-xs">{{ ap.channel }}</td>
+              <td class="px-2 py-1 text-zinc-400 text-[10px] md:text-xs">{{ ap.channel }}</td>
               <td class="px-2 py-1">
-                <div class="flex items-center text-xs font-mono">
-                  <div class="w-1.5 h-1.5 rounded-full mr-1.5" :class="getSignalDotClass(ap.rssi)"></div>
+                <div class="flex items-center text-[10px] md:text-xs font-mono">
+                  <div class="w-1.5 h-1.5 rounded-full mr-1" :class="getSignalDotClass(ap.rssi)"></div>
                   <span :class="rssiColor(ap.rssi)">{{ ap.rssi || 'N/A' }}</span>
                 </div>
               </td>
-              <td class="px-2 py-1 font-mono text-zinc-400 text-xs">{{ ap.bssid }}</td>
+              <td class="hidden sm:table-cell px-2 py-1 font-mono text-zinc-400 text-[10px] md:text-xs">{{ ap.bssid }}</td>
               <td class="px-2 py-1">
                 <span class="text-[10px] px-1 py-0.5 bg-zinc-800 text-zinc-400 rounded">
                   {{ ap.stations?.length || 0 }}
                 </span>
               </td>
-              <td class="px-2 py-1 text-zinc-500 text-xs text-right">{{ formatLastSeen(ap.lastSeen) }}</td>
+              <td class="hidden md:table-cell px-2 py-1 text-zinc-500 text-[10px] md:text-xs text-right">{{ formatLastSeen(ap.lastSeen) }}</td>
             </tr>
             <!-- Stations subrow -->
             <tr v-if="ap.showStations && ap.stations?.length" class="bg-black/30 text-xs border-b border-zinc-900">

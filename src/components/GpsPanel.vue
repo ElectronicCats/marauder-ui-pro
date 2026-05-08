@@ -78,10 +78,10 @@
             <button @click="sendCommand('gpspoi -e')" class="btn flex-1 py-1 text-xs">End</button>
           </div>
           
-          <div class="grid grid-cols-4 gap-1">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1">
             <button v-for="c in constellations" :key="c.value"
               @click="sendCommand(`gps -n ${c.value}`)"
-              class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[10px] py-1 rounded transition-colors"
+              class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[10px] py-2 md:py-1 rounded transition-colors"
               :class="activeConstellation === c.value ? 'border-cyan-500 text-cyan-400' : 'text-zinc-500'">
               {{ c.label }}
             </button>
