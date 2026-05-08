@@ -6,6 +6,7 @@ A professional, high-performance web dashboard for the [ESP32 Marauder](https://
 
 🌐 **[Live Demo](https://ElectronicCats.github.io/marauder-ui-pro/)**
 
+**Try Live Demo:** https://electroniccats.github.io/marauder-ui-pro/
 ---
 
 ## 💎 Pro Features
